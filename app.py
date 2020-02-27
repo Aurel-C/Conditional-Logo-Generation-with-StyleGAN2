@@ -4,11 +4,11 @@ import numpy as np
 
 import time
 import PIL.Image
-from stylegan_two import StyleGAN, nImage
+from stylegan_two import StyleGAN, nImage, noise
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-latent_size = 16
+latent_size = 32
 
 @app.before_first_request
 def load_model_to_app():
@@ -23,15 +23,14 @@ def index():
     values = {}
 
     for i in range(nSliders):
-        values["slider"+str(i)] = 50
+        values["slider"+str(i)] = 0
 
     if request.method == 'POST':
         values = request.form
-        x = (np.array(list(values.values()), dtype="float32")/100).reshape((1, latent_size))
+        x = (np.array(list(values.values()), dtype="float32")).reshape((1, latent_size))
     else:
-        x = np.ones((1, latent_size))*0.5
-    #imNoise stable np.ones((1, 32, 32, 1)) * 0.5
-    app.predictor.generateImage(x,nImage(1),save="static/image.jpg")
+        x = np.zeros((1, latent_size))
+    app.predictor.generateImage(x,np.ones((1, 32, 32, 1)) * 0.5,save="static/image.jpg")
     return render_template('index.html', nSliders=nSliders, val=values, size = img_size)
 
 

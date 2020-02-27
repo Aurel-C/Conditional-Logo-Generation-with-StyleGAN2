@@ -17,8 +17,8 @@ from datagen import dataGenerator, printProgressBar
 from conv_mod import *
 
 im_size = 32
-latent_size = 16
-BATCH_SIZE = 16
+latent_size = 32
+BATCH_SIZE = 32
 directory = "icons"
 
 cha = 24
@@ -620,29 +620,29 @@ class StyleGAN(object):
     def load(self, num = 0): #Load JSON and Weights from /Models/
 
         #Load Models
-        self.GAN.D = self.loadModel("dis", num)
+        # self.GAN.D = self.loadModel("dis", num)
         self.GAN.S = self.loadModel("sty", num)
         self.GAN.G = self.loadModel("gen", num)
 
-        self.GAN.GE = self.loadModel("genMA", num)
-        self.GAN.SE = self.loadModel("styMA", num)
-
+        # self.GAN.GE = self.loadModel("genMA", num)
+        # self.GAN.SE = self.loadModel("styMA", num)
+        #
         self.GAN.GenModel()
-        self.GAN.GenModelA()
+        # self.GAN.GenModelA()
 
-
-
-if __name__ == "__main__":
-    model = StyleGAN(lr = 0.0001, silent = False)
-    model.load(0)
-    model.evaluate(0)
-    # while model.GAN.steps < 2100:
-    #     model.train()
-
-    model.generateImage("Results/img0.png")
-    # n1 = noiseList(25)
-    # n2 = nImage(25)
-    # for i in range(5):
-    #     print(i, end = '\r')
-    #     model.generateTruncated(n1, noi = n2, trunc = i / 50, outImage = True, num = i)
+#
+#
+# if __name__ == "__main__":
+#     model = StyleGAN(lr = 0.0001, silent = False)
+#     model.load(0)
+#     model.evaluate(0)
+#     # while model.GAN.steps < 2100:
+#     #     model.train()
+#
+#     model.generateImage("Results/img0.png")
+#     n1 = noiseList(25)
+#     n2 = nImage(25)
+#     for i in range(5):
+#         print(i, end = '\r')
+#         model.generateTruncated(n1, noi = n2, trunc = i / 50, outImage = True, num = i)
 
