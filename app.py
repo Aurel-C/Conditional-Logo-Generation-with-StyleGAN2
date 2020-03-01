@@ -8,12 +8,12 @@ from stylegan_two import StyleGAN, nImage, noise
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-latent_size = 32
+latent_size = 16
 
 @app.before_first_request
 def load_model_to_app():
     app.predictor = StyleGAN()
-    app.predictor.load()
+    app.predictor.load(5)
 
 
 @app.route('/', methods=['POST', 'GET'])
@@ -30,7 +30,7 @@ def index():
         x = (np.array(list(values.values()), dtype="float32")).reshape((1, latent_size))
     else:
         x = np.zeros((1, latent_size))
-    app.predictor.generateImage(x,np.ones((1, 32, 32, 1)) * 0.5,save="static/image.jpg")
+    app.predictor.generateImage(x,np.ones((1, 32, 32, 1)) * 0.5)
     return render_template('index.html', nSliders=nSliders, val=values, size = img_size)
 
 

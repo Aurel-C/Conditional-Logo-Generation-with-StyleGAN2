@@ -17,10 +17,10 @@ from datagen import dataGenerator, printProgressBar
 from conv_mod import *
 
 im_size = 32
-latent_size = 32
+latent_size = 16
 BATCH_SIZE = 32
 directory = "icons"
-
+generator_size = 16
 cha = 24
 
 n_layers = int(log2(im_size) - 1)
@@ -210,13 +210,13 @@ class GAN(object):
 
         self.S = Sequential()
 
-        self.S.add(Dense(512, input_shape = [latent_size]))
+        self.S.add(Dense(generator_size, input_shape = [latent_size]))
         self.S.add(LeakyReLU(0.2))
-        self.S.add(Dense(512))
+        self.S.add(Dense(generator_size))
         self.S.add(LeakyReLU(0.2))
-        self.S.add(Dense(512))
+        self.S.add(Dense(generator_size))
         self.S.add(LeakyReLU(0.2))
-        self.S.add(Dense(512))
+        self.S.add(Dense(generator_size))
         self.S.add(LeakyReLU(0.2))
 
 
@@ -226,7 +226,7 @@ class GAN(object):
         inp_style = []
 
         for i in range(n_layers):
-            inp_style.append(Input([512]))
+            inp_style.append(Input([generator_size]))
 
         inp_noise = Input([im_size, im_size, 1])
 
@@ -579,15 +579,16 @@ class StyleGAN(object):
 
         return generated_images
 
-    def generateImage(self,latent,imNoise,save = None):
+    def generateImage(self,latent,imNoise):
         n1 = [latent]*n_layers
         generated_image = self.GAN.GM.predict(n1 + [imNoise])
         x = np.clip(generated_image[0], 0.0, 1.0)
-        if type(save) is str:
-            x = Image.fromarray(np.uint8(x * 255))
-            x.save(save)
-        elif save is not None:
-            raise Exception("Save should be a string")
+        x = Image.fromarray(np.uint8(x * 255))
+        x.save("static/image.jpg")
+        x = x.resize((im_size*2,im_size*2),Image.LANCZOS)
+        x.save("static/image2.jpg")
+        x = x.resize((im_size*4,im_size*4),Image.LANCZOS)
+        x.save("static/image4.jpg")
         return x
 
     def saveModel(self, model, name, num):
@@ -599,12 +600,12 @@ class StyleGAN(object):
 
     def loadModel(self, name, num):
 
-        file = open("static/Models/"+name+".json", 'r')
+        file = open("static/Models/16-16/"+name+".json", 'r')
         json = file.read()
         file.close()
 
         mod = model_from_json(json, custom_objects = {'Conv2DMod': Conv2DMod})
-        mod.load_weights("static/Models/"+name+"_"+str(num)+".h5")
+        mod.load_weights("static/Models/16-16/"+name+"_"+str(num)+".h5")
 
         return mod
 
@@ -630,19 +631,4 @@ class StyleGAN(object):
         self.GAN.GenModel()
         # self.GAN.GenModelA()
 
-#
-#
-# if __name__ == "__main__":
-#     model = StyleGAN(lr = 0.0001, silent = False)
-#     model.load(0)
-#     model.evaluate(0)
-#     # while model.GAN.steps < 2100:
-#     #     model.train()
-#
-#     model.generateImage("Results/img0.png")
-#     n1 = noiseList(25)
-#     n2 = nImage(25)
-#     for i in range(5):
-#         print(i, end = '\r')
-#         model.generateTruncated(n1, noi = n2, trunc = i / 50, outImage = True, num = i)
 
