@@ -13,7 +13,7 @@ latent_size = 16
 @app.before_first_request
 def load_model_to_app():
     app.predictor = StyleGAN()
-    app.predictor.load(5)
+    app.predictor.load(8)
 
 
 @app.route('/', methods=['POST', 'GET'])
