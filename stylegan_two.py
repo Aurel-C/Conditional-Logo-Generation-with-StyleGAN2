@@ -1,8 +1,6 @@
 from PIL import Image
 from math import floor, log2
 import numpy as np
-import time
-from functools import partial
 from random import random
 import os
 
@@ -13,17 +11,17 @@ from tensorflow.keras.initializers import *
 import tensorflow as tf
 import tensorflow.keras.backend as K
 
-from datagen import dataGenerator, printProgressBar
 from conv_mod import *
 
-im_size = 32
+im_size = 128
 latent_size = 16
-BATCH_SIZE = 32
-directory = "icons"
-generator_size = 16
-cha = 24
-
+BATCH_SIZE = 12
+directory = "logos"
+gen_size = 16
+cha = 32
+label_size = 4
 n_layers = int(log2(im_size) - 1)
+print()
 
 mixed_prob = 0.9
 
@@ -42,7 +40,8 @@ def mixedList(n):
 def nImage(n):
     return np.random.uniform(0.0, 1.0, size = [n, im_size, im_size, 1]).astype('float32')
 
-
+def rand_labels(n):
+    return np.eye(label_size)[np.random.choice(label_size, n)]
 #Loss functions
 def gradient_penalty(samples, output, weight):
     gradients = K.gradients(output, samples)[0]
@@ -184,20 +183,38 @@ class GAN(object):
         # x = d_block(x, 2 * cha)   #64
         #
         # x = d_block(x, 4 * cha)   #32
+        #
+        # x = d_block(inp, 6 * cha)  #16
+        #
+        # x = d_block(x, 8 * cha)  #8
+        #
+        # x = d_block(x, 16 * cha)  #4
+        #
+        # x = d_block(x, 32 * cha, p = False)  #4
 
-        x = d_block(inp, 6 * cha)  #16
+        x = d_block(inp, 1 * cha)   #64
+
+        x = d_block(x, 2 * cha)   #32
+
+        x = d_block(x, 4 * cha)  #16
 
         x = d_block(x, 8 * cha)  #8
 
         x = d_block(x, 16 * cha)  #4
 
-        x = d_block(x, 32 * cha, p = False)  #4
+        x = d_block(x, 16 * cha, p = False)  #4
 
         x = Flatten()(x)
 
-        x = Dense(1, kernel_initializer = 'he_uniform')(x)
+        x = Dense(512, kernel_initializer='he_uniform')(x)
+        x = LeakyReLU(0.2)(x)
 
-        self.D = Model(inputs = inp, outputs = x)
+        labels = Input(shape=label_size)
+
+        x = Dense(label_size, kernel_initializer = 'he_uniform')(x)
+        x = tf.reduce_sum(x*labels, axis=1, keepdims=True)
+
+        self.D = Model(inputs = [inp,labels], outputs = x)
 
         return self.D
 
@@ -208,17 +225,19 @@ class GAN(object):
 
         # === Style Mapping ===
 
-        self.S = Sequential()
-
-        self.S.add(Dense(generator_size, input_shape = [latent_size]))
-        self.S.add(LeakyReLU(0.2))
-        self.S.add(Dense(generator_size))
-        self.S.add(LeakyReLU(0.2))
-        self.S.add(Dense(generator_size))
-        self.S.add(LeakyReLU(0.2))
-        self.S.add(Dense(generator_size))
-        self.S.add(LeakyReLU(0.2))
-
+        inputs = Input(shape=latent_size)
+        labels = Input(shape=label_size)
+        labels2 = Dense(latent_size,dtype="float32")(labels)
+        out = concatenate([inputs,labels2],axis=1,dtype="float32")
+        out = Dense(gen_size)(out)
+        out = LeakyReLU(0.2)(out)
+        out = Dense(gen_size)(out)
+        out = LeakyReLU(0.2)(out)
+        out = Dense(gen_size)(out)
+        out = LeakyReLU(0.2)(out)
+        out = Dense(gen_size)(out)
+        out = LeakyReLU(0.2)(out)
+        self.S = Model(inputs=[inputs,labels], outputs=out)
 
         # === Generator ===
 
@@ -226,7 +245,7 @@ class GAN(object):
         inp_style = []
 
         for i in range(n_layers):
-            inp_style.append(Input([generator_size]))
+            inp_style.append(Input([gen_size]))
 
         inp_noise = Input([im_size, im_size, 1])
 
@@ -239,7 +258,7 @@ class GAN(object):
         x = Dense(4*4*4*cha, activation = 'relu', kernel_initializer = 'random_normal')(x)
         x = Reshape([4, 4, 4*cha])(x)
 
-        x, r = g_block(x, inp_style[0], inp_noise, 32 * cha, u = False)  #4
+        x, r = g_block(x, inp_style[0], inp_noise, 16 * cha, u = False)  #4
         outs.append(r)
 
         x, r = g_block(x, inp_style[1], inp_noise, 16 * cha)  #8
@@ -248,8 +267,26 @@ class GAN(object):
         x, r = g_block(x, inp_style[2], inp_noise, 8 * cha)  #16
         outs.append(r)
 
-        x, r = g_block(x, inp_style[3], inp_noise, 6 * cha)  #32
+        x, r = g_block(x, inp_style[3], inp_noise, 4 * cha)  #32
         outs.append(r)
+
+        x, r = g_block(x, inp_style[4], inp_noise, 2 * cha)   #64
+        outs.append(r)
+
+        x, r = g_block(x, inp_style[5], inp_noise, 1 * cha)   #128
+        outs.append(r)
+
+        # x, r = g_block(x, inp_style[0], inp_noise, 32 * cha, u = False)  #4
+        # outs.append(r)
+        #
+        # x, r = g_block(x, inp_style[1], inp_noise, 16 * cha)  #8
+        # outs.append(r)
+        #
+        # x, r = g_block(x, inp_style[2], inp_noise, 8 * cha)  #16
+        # outs.append(r)
+        #
+        # x, r = g_block(x, inp_style[3], inp_noise, 6 * cha)  #32
+        # outs.append(r)
 
         # x, r = g_block(x, inp_style[4], inp_noise, 4 * cha)   #64
         # outs.append(r)
@@ -274,15 +311,15 @@ class GAN(object):
 
         inp_style = []
         style = []
-
+        labels = Input([label_size])
         for i in range(n_layers):
             inp_style.append(Input([latent_size]))
-            style.append(self.S(inp_style[-1]))
+            style.append(self.S([inp_style[-1],labels]))
 
         inp_noise = Input([im_size, im_size, 1])
         gf = self.G(style + [inp_noise])
 
-        self.GM = Model(inputs = inp_style + [inp_noise], outputs = gf)
+        self.GM = Model(inputs = inp_style + [inp_noise,labels], outputs = gf)
 
         return self.GM
 
@@ -292,15 +329,15 @@ class GAN(object):
 
         inp_style = []
         style = []
-
+        labels = Input([label_size])
         for i in range(n_layers):
             inp_style.append(Input([latent_size]))
-            style.append(self.SE(inp_style[-1]))
+            style.append(self.SE([inp_style[-1],labels]))
 
         inp_noise = Input([im_size, im_size, 1])
         gf = self.GE(style + [inp_noise])
 
-        self.GMA = Model(inputs = inp_style + [inp_noise], outputs = gf)
+        self.GMA = Model(inputs = inp_style + [inp_noise,labels], outputs = gf)
 
         return self.GMA
 
@@ -349,7 +386,7 @@ class StyleGAN(object):
         # self.im = dataGenerator(directory, im_size, flip = True)
 
         #Set up variables
-        self.lastblip = time.clock()
+        # self.lastblip = time.perf_counter()
 
         self.silent = silent
 
@@ -360,7 +397,7 @@ class StyleGAN(object):
         self.pl_mean = 0
         self.av = np.zeros([44])
 
-    def train(self):
+    def train(self,steps):
 
         #Train Alternating
         if random() < mixed_prob:
@@ -372,7 +409,7 @@ class StyleGAN(object):
         apply_gradient_penalty = self.GAN.steps % 2 == 0 or self.GAN.steps < 10000
         apply_path_penalty = self.GAN.steps % 16 == 0
 
-        a, b, c, d = self.train_step(self.im.get_batch(BATCH_SIZE).astype('float32'), style, nImage(BATCH_SIZE), apply_gradient_penalty, apply_path_penalty)
+        a, b, c, d = self.train_step(self.im.get_batch(BATCH_SIZE),style, nImage(BATCH_SIZE), apply_gradient_penalty, apply_path_penalty)
 
         #Adjust path length penalty mean
         #d = pl_mean when no penalty is applied
@@ -392,16 +429,16 @@ class StyleGAN(object):
 
 
         #Print info
-        if self.GAN.steps % 100 == 0 and not self.silent:
+        if self.GAN.steps % 500 == 0 and not self.silent:
             print("\n\nRound " + str(self.GAN.steps) + ":")
             print("D:", np.array(a))
             print("G:", np.array(b))
             print("PL:", self.pl_mean)
 
-            s = round((time.clock() - self.lastblip), 4)
-            self.lastblip = time.clock()
+            s = round((time.perf_counter() - self.lastblip), 4)
+            self.lastblip = time.perf_counter()
 
-            steps_per_second = 100 / s
+            steps_per_second = 500 / s
             steps_per_minute = steps_per_second * 60
             steps_per_hour = steps_per_minute * 60
             print("Steps/Second: " + str(round(steps_per_second, 2)))
@@ -410,7 +447,7 @@ class StyleGAN(object):
             min1k = floor(1000/steps_per_minute)
             sec1k = floor(1000/steps_per_second) % 60
             print("1k Steps: " + str(min1k) + ":" + str(sec1k))
-            steps_left = 2100 - self.GAN.steps + 1e-7
+            steps_left = steps - self.GAN.steps + 1e-7
             hours_left = steps_left // steps_per_hour
             minutes_left = (steps_left // steps_per_minute) % 60
 
@@ -420,11 +457,8 @@ class StyleGAN(object):
             #Save Model
             if self.GAN.steps % 500 == 0:
                 self.save(floor(self.GAN.steps / 10000))
-            if self.GAN.steps % 1000 == 0 or (self.GAN.steps % 100 == 0 and self.GAN.steps < 2500):
+            if self.GAN.steps % 500 == 0 or (self.GAN.steps % 100 == 0 and self.GAN.steps < 2500):
                 self.evaluate(floor(self.GAN.steps / 1000))
-
-
-        printProgressBar(self.GAN.steps % 100, 99, decimals = 0)
 
         self.GAN.steps = self.GAN.steps + 1
 
@@ -435,16 +469,17 @@ class StyleGAN(object):
             #Get style information
             w_space = []
             pl_lengths = self.pl_mean
+            labels = rand_labels(images[1].shape[0])
             for i in range(len(style)):
-                w_space.append(self.GAN.S(style[i]))
+                w_space.append(self.GAN.S([style[i],labels]))
+
 
             #Generate images
             generated_images = self.GAN.G(w_space + [noise])
 
             #Discriminate
-            real_output = self.GAN.D(images, training=True)
-            fake_output = self.GAN.D(generated_images, training=True)
-
+            real_output = self.GAN.D([images[0],images[1]], training=True)
+            fake_output = self.GAN.D([generated_images,labels], training=True)
             #Hinge loss function
             gen_loss = K.mean(fake_output)
             divergence = K.mean(K.relu(1 + real_output) + K.relu(1 - fake_output))
@@ -452,7 +487,7 @@ class StyleGAN(object):
 
             if perform_gp:
                 #R1 gradient penalty
-                disc_loss += gradient_penalty(images, real_output, 10)
+                disc_loss += gradient_penalty(images[0], real_output, 10)
 
             if perform_pl:
                 #Slightly adjust W space
@@ -486,9 +521,8 @@ class StyleGAN(object):
         n1 = noiseList(64)
         n2 = nImage(64)
         trunc = np.ones([64, 1]) * trunc
-
-
-        generated_images = self.GAN.GM.predict(n1 + [n2], batch_size = BATCH_SIZE)
+        labels = rand_labels(64)
+        generated_images = self.GAN.GM.predict(n1 + [n2,labels], batch_size = BATCH_SIZE)
 
         r = []
 
@@ -503,7 +537,7 @@ class StyleGAN(object):
 
         # Moving Average
 
-        generated_images = self.GAN.GMA.predict(n1 + [n2, trunc], batch_size = BATCH_SIZE)
+        generated_images = self.GAN.GMA.predict(n1 + [n2,labels, trunc], batch_size = BATCH_SIZE)
         #generated_images = self.generateTruncated(n1, trunc = trunc)
 
         r = []
@@ -529,7 +563,7 @@ class StyleGAN(object):
 
         latent = p1 + [] + p2
 
-        generated_images = self.GAN.GMA.predict(latent + [nImage(64), trunc], batch_size = BATCH_SIZE)
+        generated_images = self.GAN.GMA.predict(latent + [nImage(64),labels, trunc], batch_size = BATCH_SIZE)
         #generated_images = self.generateTruncated(latent, trunc = trunc)
 
         r = []
@@ -579,18 +613,6 @@ class StyleGAN(object):
 
         return generated_images
 
-    def generateImage(self,latent,imNoise):
-        n1 = [latent]*n_layers
-        generated_image = self.GAN.GM.predict(n1 + [imNoise])
-        x = np.clip(generated_image[0], 0.0, 1.0)
-        x = Image.fromarray(np.uint8(x * 255))
-        x.save("static/image.jpg")
-        x = x.resize((im_size*2,im_size*2),Image.LANCZOS)
-        x.save("static/image2.jpg")
-        x = x.resize((im_size*4,im_size*4),Image.LANCZOS)
-        x.save("static/image4.jpg")
-        return x
-
     def saveModel(self, model, name, num):
         json = model.to_json()
         with open("Models/"+name+".json", "w") as json_file:
@@ -600,12 +622,12 @@ class StyleGAN(object):
 
     def loadModel(self, name, num):
 
-        file = open("static/Models/16-16/"+name+".json", 'r')
+        file = open("static/Models/"+name+".json", 'r')
         json = file.read()
         file.close()
 
         mod = model_from_json(json, custom_objects = {'Conv2DMod': Conv2DMod})
-        mod.load_weights("static/Models/16-16/"+name+"_"+str(num)+".h5")
+        mod.load_weights("static/Models/"+name+"_"+str(num)+".h5")
 
         return mod
 
@@ -618,17 +640,89 @@ class StyleGAN(object):
         self.saveModel(self.GAN.SE, "styMA", num)
 
 
-    def load(self, num = 0): #Load JSON and Weights from /Models/
+    def load(self, num): #Load JSON and Weights from /Models/
 
         #Load Models
         # self.GAN.D = self.loadModel("dis", num)
         self.GAN.S = self.loadModel("sty", num)
         self.GAN.G = self.loadModel("gen", num)
 
-        # self.GAN.GE = self.loadModel("genMA", num)
-        # self.GAN.SE = self.loadModel("styMA", num)
-        #
-        self.GAN.GenModel()
-        # self.GAN.GenModelA()
+        self.GAN.GE = self.loadModel("genMA", num)
+        self.GAN.SE = self.loadModel("styMA", num)
 
+        self.GAN.GenModel()
+        self.GAN.GenModelA()
+
+    def generateImage(self,latent,label,imNoise,style):
+        n1 = [latent]*(n_layers-2)+[style]*2
+        labels = np.array([[0,0,0,0]])
+        labels[0,label] = 1
+        generated_image = self.GAN.GMA.predict(n1 + [imNoise,labels])
+        x = np.clip(generated_image[0], 0.0, 1.0)
+        x = Image.fromarray(np.uint8(x * 255))
+        x.save("static/image.jpg")
+
+    def generateImageOld(self,save = None):
+        # n1 = noiseList(1)
+        n1 = [np.ones((1,latent_size))]*n_layers
+        # n2 = nImage(1)
+        n2 = np.ones((1,128,128,1))
+        labels = rand_labels(1)
+        generated_images = model.GAN.GM.predict(n1 + [n2,labels])
+        x = np.clip(generated_images[0], 0.0, 1.0)
+        if type(save) is str:
+            x = Image.fromarray(np.uint8(x * 255))
+            x.save(save)
+        return x
+
+    def generateImagebyLabel(self,save = None):
+        n1 = noiseList(40)
+        n2 = nImage(40)
+        arr = [int(i/10) for i in range(40)]
+        labels = np.eye(4)[arr]
+        generated_images = model.GAN.GM.predict(n1 + [n2,labels])
+
+        r = []
+        for i in range(0, 40, 10):
+            r.append(np.concatenate(generated_images[i:i+10], axis = 1))
+
+        c1 = np.concatenate(r, axis = 0)
+        c1 = np.clip(c1, 0.0, 1.0)
+        x = Image.fromarray(np.uint8(c1 * 255))
+        x.show()
+        if type(save) is str:
+            x.save(save)
+        return x
+    def generateImagebyLabelStyle(self,save = None):
+        arr = [int(i/10) for i in range(40)]
+        labels = np.eye(4)[arr]
+        trunc = np.ones([40, 1]) * 0.5
+        nn = noise(10)
+        # nn = np.repeat((np.arange(0,10).astype("float32").reshape((10,1))/10),16,axis=1)
+        # nn = np.ones((10,latent_size),dtype="float32")
+
+        n1 = np.zeros((40,latent_size),dtype="float32")
+
+        n2 = np.tile(nn, (4, 1))
+        # n1 = np.repeat(nn, 4, axis = 0)
+        # tt = int(n_layers / 2)
+        tt = 4
+
+        p1 = [n1] * tt
+        p2 = [n2] * (n_layers - tt)
+
+        latent = p1 + [] + p2
+        generated_images = self.GAN.GMA.predict(latent + [np.ones((40,128,128,1),dtype="float32")*0,labels,trunc])
+        # generated_images = self.GAN.GMA.predict(latent + [nImage(40), dtype="float32"), labels])
+        r = []
+        for i in range(0, 40, 10):
+            r.append(np.concatenate(generated_images[i:i+10], axis = 1))
+
+        c1 = np.concatenate(r, axis = 0)
+        c1 = np.clip(c1, 0.0, 1.0)
+        x = Image.fromarray(np.uint8(c1 * 255))
+        x.show()
+        if type(save) is str:
+            x.save(save)
+        return x
 

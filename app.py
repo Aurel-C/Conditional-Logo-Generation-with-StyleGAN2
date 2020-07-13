@@ -1,37 +1,39 @@
 from flask import Flask, request, render_template
 import tensorflow as tf
 import numpy as np
-
-import time
-import PIL.Image
 from stylegan_two import StyleGAN, nImage, noise
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 latent_size = 16
 
+# Chargement du modele
 @app.before_first_request
 def load_model_to_app():
     app.predictor = StyleGAN()
-    app.predictor.load(8)
+    app.predictor.load(10)
 
-
+#Chargement de la page
 @app.route('/', methods=['POST', 'GET'])
 def index():
-    img_size =32
+    img_size =128
     nSliders = latent_size
-    values = {}
-
-    for i in range(nSliders):
-        values["slider"+str(i)] = 0
-
     if request.method == 'POST':
         values = request.form
-        x = (np.array(list(values.values()), dtype="float32")).reshape((1, latent_size))
     else:
-        x = np.zeros((1, latent_size))
-    app.predictor.generateImage(x,np.ones((1, 32, 32, 1)) * 0.5)
-    return render_template('index.html', nSliders=nSliders, val=values, size = img_size)
+        values = {}
+        values["label"] = 0
+        values["noise"] = 0.5
+        for i in range(nSliders):
+            values["slider"+str(i)] = 0
+            values["style"+str(i)] = 0
+
+    label = int(values.get("label"))
+    x = (np.array([v for k,v in values.items() if 'slider' in k], dtype="float32")).reshape((1, latent_size))
+    style = (np.array([v for k,v in values.items() if 'style' in k], dtype="float32")).reshape((1, latent_size))
+    noise = float(values.get("noise"))
+    app.predictor.generateImage(x,label,np.ones((1, img_size, img_size, 1))*noise,style)
+    return render_template('index.html', nSliders=nSliders, val=values,size = img_size)
 
 
 if __name__ == "__main__":
