@@ -7,15 +7,22 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
     <style>
         button {
-            width: 100%;
+            margin: 5px 15px 5px 15px;
         }
 
-        .col-md-4 {
-            padding-left: 0;
-            padding-right: 0;
+        .slider_container {
+            display: none;
         }
     </style>
     <script>
+        function hide(id) {
+            var x = document.getElementById(id);
+            if (x.style.display === "none") {
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
+        }
         function random_normal() {
             var u = 0, v = 0;
             while (u === 0) u = Math.random();
@@ -44,14 +51,16 @@
 </head>
 
 <body class="container" style="text-align: center;// color:white; //background-color:#333; font-family:sans-serif;">
-    <h1>Générateur de Logos</h1>
+    <h1 class="display-4" style="padding: 10px;">Générateur de Logos</h1>
     <form method="POST" class="row">
-        <div class="col-sm-4">
+        <div class="col-md-4">
             <div class="card card-primary">
                 <div class="card-header">Motif:</div>
-                <button class="btn btn-primary col" onclick="randomise('slider','value',true)">Aléatoire</button>
-                <button class="btn btn-primary col" onclick="to_zero('slider','value')">Réinitialiser</button>
-                <div class="slider_container card-body"
+                <button class="btn btn-primary" onclick="randomise('slider','value',true)">Aléatoire</button>
+                <button class="btn btn-info" onclick="to_zero('slider','value')">Réinitialiser</button>
+                <button type="button" class="btn btn-secondary dropdown-toggle"
+                    onclick="hide('motif-params')">Paramètres</button>
+                <div class="slider_container card-body" id="motif-params"
                     style="margin-bottom:20px;height: 700px;overflow: auto;//background-color:#444">
                     {% for n in range(nSliders)%}
                     <output id={{"value"~n}} for={{"slider"~n}}>{{val["slider"~n]}}</output>
@@ -62,12 +71,14 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-4">
+        <div class="col-md-4">
             <div class="card ">
                 <div class="card-header">Couleurs:</div>
-                <button class="btn btn-primary col" onclick="randomise('style','Svalue',true)">Aléatoire</button>
-                <button class="btn btn-primary col" onclick="to_zero('style','Svalue')">Réinitialiser</button>
-                <div class="slider_container card-body"
+                <button class="btn btn-primary" onclick="randomise('style','Svalue',true)">Aléatoire</button>
+                <button class="btn btn-info" onclick="to_zero('style','Svalue')">Réinitialiser</button>
+                <button type="button" class="btn btn-secondary dropdown-toggle"
+                    onclick="hide('couleur-params')">Paramètres</button>
+                <div class="slider_container card-body" id="couleur-params"
                     style="margin-bottom:20px;height: 700px;overflow: auto;//background-color:#444">
                     {% for n in range(nSliders)%}
                     <output id={{"Svalue"~n}} for={{"style"~n}}>{{val["style"~n]}}</output>
@@ -78,27 +89,32 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-4">
-            <div class="image_container">
-                <img src="static/image.jpg">
+        <div class="col-md-4">
+            <div class="card card-primary">
+                <div class="card-header">Logo Généré:</div>
+                <div class="card-body">
+                    <div class="image_container">
+                        <img src="static/image.jpg">
+                    </div>
+                </div>
             </div>
             <br>
             <div class="card card-primary">
                 <div class="card-header">Catégorie:</div>
                 <div class="card-body row">
-                    <div class="col-sm-3">
+                    <div class="col-md-3">
                         <input type="radio" min=0 max=3 id="cercle" name="label" value=0
                             {% if val["label"]== 0 or val["label"]=='0' %}checked{% endif %}><label>0</label>
                     </div>
-                    <div class="col-sm-3">
+                    <div class="col-md-3">
                         <input type="radio" min=0 max=3 id="gcarre" name="label" value=1
                             {% if val["label"]=='1' %}checked{% endif %}><label>1</label>
                     </div>
-                    <div class="col-sm-3">
+                    <div class="col-md-3">
                         <input type="radio" min=0 max=3 id="pcarre" name="label" value=2
                             {% if val["label"]=='2' %}checked{% endif %}><label>2</label>
                     </div>
-                    <div class="col-sm-3">
+                    <div class="col-md-3">
                         <input type="radio" min=0 max=3 id="fond" name="label" value=3
                             {% if val["label"]=='3' %}checked{% endif %}><label>3</label>
                     </div>
@@ -107,10 +123,12 @@
                 <div class="card-header">Bruit:</div>
                 <div class="card-body">
                     <output id={{"Nvalue"~n}} for={{"noise"~n}}>{{val["noise"~n]}}</output>
+                    <br>
                     <input min="0" max="1" step="0.1" id={{"noise"~n}} name={{"noise"~n}} type="range"
                         value={{val["noise"~n]}} oninput="{{"Nvalue"~n}}.value={{"noise"~n}}.value">
                 </div>
             </div>
+            <br>
             <input class="btn btn-primary" type="submit" value="Générer" />
         </div>
     </form>
