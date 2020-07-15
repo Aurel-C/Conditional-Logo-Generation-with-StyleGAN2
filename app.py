@@ -6,12 +6,12 @@ from stylegan_two import StyleGAN, nImage, noise
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 latent_size = 16
+app.predictor = StyleGAN()
+app.predictor.load(10)
+# # Chargement du modele
+# @app.before_first_request
+# def load_model_to_app():
 
-# Chargement du modele
-@app.before_first_request
-def load_model_to_app():
-    app.predictor = StyleGAN()
-    app.predictor.load(10)
 
 #Chargement de la page
 @app.route('/', methods=['POST', 'GET'])
@@ -37,5 +37,5 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True,use_reloader=False)
 
