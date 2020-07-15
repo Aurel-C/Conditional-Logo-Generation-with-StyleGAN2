@@ -49,6 +49,8 @@
         <div class="col-xs-4">
             <div class="panel panel-primary">
                 <div class="panel-heading">Motif:</div>
+                <button class="btn btn-primary col-xs-6" onclick="to_zero('slider','value')">Réinitialiser</button>
+                <button class="btn btn-primary col-xs-6" onclick="randomise('slider','value',true)">Aléatoire</button>
                 <div class="slider_container panel-body"
                     style="margin-bottom:20px;height: 700px;overflow: auto;//background-color:#444">
                     {% for n in range(nSliders)%}
@@ -57,13 +59,14 @@
                         value={{val["slider"~n]}} oninput="{{"value"~n}}.value={{"slider"~n}}.value"><br>
                     {% endfor %}
                 </div>
-                <button class="btn btn-primary col-xs-6" onclick="to_zero('slider','value')">Réinitialiser</button>
-                <button class="btn btn-primary col-xs-6" onclick="randomise('slider','value',true)">Aléatoire</button>
             </div>
         </div>
         <div class="col-xs-4">
             <div class="panel panel-primary">
                 <div class="panel-heading">Couleurs:</div>
+                <button class="btn btn-primary col-xs-6" onclick="to_zero('style','Svalue')">Réinitialiser</button>
+                <button class="btn btn-primary col-xs-6" onclick="randomise('style','Svalue',true)">Aléatoire</button>
+
                 <div class="slider_container panel-body"
                     style="margin-bottom:20px;height: 700px;overflow: auto;//background-color:#444">
                     {% for n in range(nSliders)%}
@@ -72,8 +75,6 @@
                         value={{val["style"~n]}} oninput="{{"Svalue"~n}}.value={{"style"~n}}.value"><br>
                     {% endfor %}
                 </div>
-                <button class="btn btn-primary col-xs-6" onclick="to_zero('style','Svalue')">Réinitialiser</button>
-                <button class="btn btn-primary col-xs-6" onclick="randomise('style','Svalue',true)">Aléatoire</button>
             </div>
         </div>
         <div class="col-xs-4">
