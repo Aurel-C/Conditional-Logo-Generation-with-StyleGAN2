@@ -11,6 +11,7 @@ latent_size = 64
 app.predictor = StyleGAN()
 app.predictor.load(12)
 
+
 #Chargement de la page
 @app.route('/', methods=['POST', 'GET'])
 def index():
@@ -23,8 +24,8 @@ def index():
         values["label"] = 0
         values["noise"] = 0.5
         for i in range(nSliders):
-            values["slider"+str(i)] = 0
-            values["style"+str(i)] = 0
+            values["slider"+str(i)] = np.random.normal()
+            values["style"+str(i)] = np.random.normal()
 
     label = int(values.get("label"))
     x = (np.array([v for k,v in values.items() if 'slider' in k], dtype="float32")).reshape((1, latent_size))

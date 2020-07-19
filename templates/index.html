@@ -9,9 +9,6 @@
         button {
             margin: 5px 15px 5px 15px;
         }
-        .slider_container {
-            display: none;
-        }
         .cat{
             margin-left: 3px;
             border: 1px solid black;
@@ -64,11 +61,11 @@
                 <button type="button" class="btn btn-secondary dropdown-toggle"
                     onclick="hide('motif-params')">Paramètres</button>
                 <div class="slider_container card-body" id="motif-params"
-                    style="height: 450px;overflow: auto;//background-color:#444">
+                    style="height: 450px;overflow: auto;display: none;">
                     {% for n in range(nSliders)%}
                     <output id={{"value"~n}} for={{"slider"~n}}>{{val["slider"~n]}}</output>
                     <br>
-                    <input min="-1.5" max="1.5" step="0.1" id={{"slider"~n}} name={{"slider"~n}} type="range"
+                    <input min="-2" max="2" step="0.1" id={{"slider"~n}} name={{"slider"~n}} type="range"
                         value={{val["slider"~n]}} oninput="{{"value"~n}}.value={{"slider"~n}}.value"><br>
                     {% endfor %}
                 </div>
@@ -84,11 +81,11 @@
                 <button type="button" class="btn btn-secondary dropdown-toggle"
                     onclick="hide('couleur-params')">Paramètres</button>
                 <div class="slider_container card-body" id="couleur-params"
-                    style="height: 450px;overflow: auto;//background-color:#444">
+                    style="height: 450px;overflow: auto;display: none;">
                     {% for n in range(nSliders)%}
                     <output id={{"Svalue"~n}} for={{"style"~n}}>{{val["style"~n]}}</output>
                     <br>
-                    <input min="-1.5" max="1.5" step="0.1" id={{"style"~n}} name={{"style"~n}} type="range"
+                    <input min="-2" max="2" step="0.1" id={{"style"~n}} name={{"style"~n}} type="range"
                         value={{val["style"~n]}} oninput="{{"Svalue"~n}}.value={{"style"~n}}.value"><br>
                     {% endfor %}
                 </div>
