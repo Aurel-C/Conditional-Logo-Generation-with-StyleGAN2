@@ -9,9 +9,12 @@
         button {
             margin: 5px 15px 5px 15px;
         }
-
         .slider_container {
             display: none;
+        }
+        .cat{
+            margin-left: 3px;
+            border: 1px solid black;
         }
     </style>
     <script>
@@ -32,7 +35,7 @@
         function randomise(slider, value, normal) {
             for (var i = 0; i < {{ nSliders }}; i++) {
             if (normal) {
-                var val = Math.round(random_normal() * 10) / 20;
+                var val = Math.round(random_normal() * 10) / 10;
             }
             else {
                 var val = Math.round((Math.random() * 4 - 2) * 10) / 10;
@@ -50,7 +53,7 @@
     </script>
 </head>
 
-<body class="container" style="text-align: center;// color:white; //background-color:#333; font-family:sans-serif;">
+<body class="container" style="text-align: center; font-family:sans-serif;">
     <h1 class="display-4" style="padding: 10px;">Générateur de Logos</h1>
     <form method="POST" class="row">
         <div class="col-md-4">
@@ -61,7 +64,7 @@
                 <button type="button" class="btn btn-secondary dropdown-toggle"
                     onclick="hide('motif-params')">Paramètres</button>
                 <div class="slider_container card-body" id="motif-params"
-                    style="margin-bottom:20px;height: 700px;overflow: auto;//background-color:#444">
+                    style="height: 450px;overflow: auto;//background-color:#444">
                     {% for n in range(nSliders)%}
                     <output id={{"value"~n}} for={{"slider"~n}}>{{val["slider"~n]}}</output>
                     <br>
@@ -81,7 +84,7 @@
                 <button type="button" class="btn btn-secondary dropdown-toggle"
                     onclick="hide('couleur-params')">Paramètres</button>
                 <div class="slider_container card-body" id="couleur-params"
-                    style="margin-bottom:20px;height: 700px;overflow: auto;//background-color:#444">
+                    style="height: 450px;overflow: auto;//background-color:#444">
                     {% for n in range(nSliders)%}
                     <output id={{"Svalue"~n}} for={{"style"~n}}>{{val["style"~n]}}</output>
                     <br>
@@ -108,19 +111,19 @@
                 <div class="card-body row">
                     <div class="col-md-3">
                         <input type="radio" min=0 max=3 id="cercle" name="label" value=0
-                            {% if val["label"]== 0 or val["label"]=='0' %}checked{% endif %}><label>0</label>
+                            {% if val["label"]== 0 or val["label"]=='0' %}checked{% endif %}><label><img class="cat" src="static/image/cat-0.jpg"></label>
                     </div>
                     <div class="col-md-3">
                         <input type="radio" min=0 max=3 id="gcarre" name="label" value=1
-                            {% if val["label"]=='1' %}checked{% endif %}><label>1</label>
+                            {% if val["label"]=='1' %}checked{% endif %}><label><img class="cat" src="static/image/cat-1.jpg"></label>
                     </div>
                     <div class="col-md-3">
                         <input type="radio" min=0 max=3 id="pcarre" name="label" value=2
-                            {% if val["label"]=='2' %}checked{% endif %}><label>2</label>
+                            {% if val["label"]=='2' %}checked{% endif %}><label><img class="cat" src="static/image/cat-2.jpg"></label>
                     </div>
                     <div class="col-md-3">
                         <input type="radio" min=0 max=3 id="fond" name="label" value=3
-                            {% if val["label"]=='3' %}checked{% endif %}><label>3</label>
+                            {% if val["label"]=='3' %}checked{% endif %}><label><img class="cat" src="static/image/cat-3.jpg"></label>
                     </div>
 
                 </div>

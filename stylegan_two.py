@@ -14,10 +14,10 @@ import tensorflow.keras.backend as K
 from conv_mod import *
 
 im_size = 128
-latent_size = 16
-BATCH_SIZE = 12
+latent_size = 64
+BATCH_SIZE = 0
 directory = "logos"
-gen_size = 16
+gen_size = 64
 cha = 32
 label_size = 4
 n_layers = int(log2(im_size) - 1)
