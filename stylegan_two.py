@@ -653,27 +653,14 @@ class StyleGAN(object):
         self.GAN.GenModel()
         self.GAN.GenModelA()
 
-    def generateImage(self,latent,label,imNoise,style):
+    def generateImage(self,latent,label,imNoise,style,path):
         n1 = [latent]*(n_layers-2)+[style]*2
         labels = np.array([[0,0,0,0]])
         labels[0,label] = 1
         generated_image = self.GAN.GMA.predict(n1 + [imNoise,labels])
         x = np.clip(generated_image[0], 0.0, 1.0)
         x = Image.fromarray(np.uint8(x * 255))
-        x.save("static/image.jpg")
-
-    def generateImageOld(self,save = None):
-        # n1 = noiseList(1)
-        n1 = [np.ones((1,latent_size))]*n_layers
-        # n2 = nImage(1)
-        n2 = np.ones((1,128,128,1))
-        labels = rand_labels(1)
-        generated_images = model.GAN.GM.predict(n1 + [n2,labels])
-        x = np.clip(generated_images[0], 0.0, 1.0)
-        if type(save) is str:
-            x = Image.fromarray(np.uint8(x * 255))
-            x.save(save)
-        return x
+        x.save(path)
 
     def generateImagebyLabel(self,save = None):
         n1 = noiseList(40)
