@@ -564,7 +564,6 @@ class StyleGAN(object):
         latent = p1 + [] + p2
 
         generated_images = self.GAN.GMA.predict(latent + [nImage(64),labels, trunc], batch_size = BATCH_SIZE)
-        #generated_images = self.generateTruncated(latent, trunc = trunc)
 
         r = []
 
@@ -680,19 +679,17 @@ class StyleGAN(object):
         if type(save) is str:
             x.save(save)
         return x
+
     def generateImagebyLabelStyle(self,save = None):
         arr = [int(i/10) for i in range(40)]
         labels = np.eye(4)[arr]
         trunc = np.ones([40, 1]) * 0.5
         nn = noise(10)
-        # nn = np.repeat((np.arange(0,10).astype("float32").reshape((10,1))/10),16,axis=1)
-        # nn = np.ones((10,latent_size),dtype="float32")
 
-        n1 = np.zeros((40,latent_size),dtype="float32")
+        n1 = np.random.normal(size=(1,latent_size)).astype(np.float32)
+        n1 = np.repeat(n1,40,axis=0)
 
         n2 = np.tile(nn, (4, 1))
-        # n1 = np.repeat(nn, 4, axis = 0)
-        # tt = int(n_layers / 2)
         tt = 4
 
         p1 = [n1] * tt
@@ -700,7 +697,6 @@ class StyleGAN(object):
 
         latent = p1 + [] + p2
         generated_images = self.GAN.GMA.predict(latent + [np.ones((40,128,128,1),dtype="float32")*0,labels,trunc])
-        # generated_images = self.GAN.GMA.predict(latent + [nImage(40), dtype="float32"), labels])
         r = []
         for i in range(0, 40, 10):
             r.append(np.concatenate(generated_images[i:i+10], axis = 1))
