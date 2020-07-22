@@ -3,77 +3,91 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Générateur de Logos</title>
+    <title>Logo Generator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
     <style>
         .cat {
             margin-left: 3px;
             border: 1px solid black;
         }
-        .table{
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        .table {
             padding: 0px;
         }
+
         .btn-image {
             border-radius: 0;
             border: 0px;
             padding: 0px;
         }
+
+        .btn-left {
+            margin: 0 10px 0 20px;
+        }
+
+        .btn-right {
+            margin: 0 20px 0 10px;
+        }
     </style>
 </head>
 
 <body class="container" style="text-align: center; font-family:sans-serif;">
-    <h1 class="display-4" style="padding: 10px;">Générateur de Logos</h1>
+    <h1 style="padding: 10px;">Logo Generator</h1>
     <form method="POST" class="row">
-        <div class="col-xl">
+        <div class="col-lg">
             <div class="card">
-                <div class="card-header">Changer le Motif</div>
+                <div class="card-header">Change Pattern:</div>
                 <div class="card-body">
-                    <button class="btn btn-primary" name="motif" value="rand">Aléatoire</button>
-                    <button class="btn btn-primary" name="motif" value="autre">Variante</button>
+                    <div class="row">
+                        <button class="btn btn-primary btn-sm col btn-left" name="pattern" value="rand">Random</button>
+                        <button class="btn btn-primary btn-sm col btn-right" name="pattern" value="autre">Small
+                            changes</button>
+                    </div>
                     <hr>
-                    <table class="table table-borderless table-responsive card-body">
-                        <tbody>
-                            {% for i in range(2)%}
-                            <tr>
-                                {% for j in range(2)%}
-                                <td><button class="btn btn-image" name="motif" value={{i*2+j}}><img
-                                            src="static/image/logo/motif/i{{i*2+j}}.jpg"></button></td>
-                                {% endfor %}
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    {% for i in range(2)%}
+                    <div class="row">
+                        {% for j in range(2)%}
+                        <div class="col-6"><button class="btn btn-image" name="pattern" value={{i*2+j}}><img
+                                    src="static/image/logo/pattern/i{{i*2+j}}.jpg"></button></div>
+                        {% endfor %}
+                    </div>
+                    {% if i==0 %}<br>{% endif %}
+                    {% endfor %}
                 </div>
             </div>
             <br>
         </div>
-        <div class="col-xl">
+        <div class="col-lg">
             <div class="card">
-                <div class="card-header">Changer la Couleur</div>
+                <div class="card-header">Change Color:</div>
                 <div class="card-body">
-                    <button class="btn btn-primary" name="couleur" value="rand">Aléatoire</button>
-                    <button class="btn btn-primary" name="couleur" value="autre">Variante</button>
+                    <div class="row">
+                        <button class="btn btn-primary btn-sm col btn-left" name="color" value="rand">Random</button>
+                        <button class="btn btn-primary btn-sm col btn-right" name="color" value="autre">Small
+                            changes</button>
+                    </div>
                     <hr>
-                    <table class="table table-borderless table-responsive card-body">
-                        <tbody>
-                            {% for i in range(2)%}
-                            <tr>
-                                {% for j in range(2)%}
-                                <td><button class="btn btn-image" name="couleur" value={{i*2+j}}><img
-                                            src="static/image/logo/couleur/i{{i*2+j}}.jpg"></button></td>
-                                {% endfor %}
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    {% for i in range(2)%}
+                    <div class="row">
+                        {% for j in range(2)%}
+                        <div class="col-6"><button class="btn btn-image" name="color" value={{i*2+j}}><img
+                                    src="static/image/logo/color/i{{i*2+j}}.jpg"></button></div>
+                        {% endfor %}
+                    </div>
+                    {% if i==0 %}<br>{% endif %}
+                    {% endfor %}
                 </div>
             </div>
             <br>
         </div>
 
-        <div class="col-xl">
+        <div class="col-lg">
             <div class="card ">
-                <div class="card-header">Logo Généré:</div>
+                <div class="card-header">Generated Logo:</div>
                 <div class="card-body">
                     <div class="image_container">
                         <img src="static/image/image.jpg">
@@ -82,7 +96,7 @@
             </div>
             <br>
             <div class="card">
-                <div class="card-header">Catégorie:</div>
+                <div class="card-header">Category:</div>
                 <div class="card-body row">
                     <div class="col-md-3">
                         <input type="radio" min=0 max=3 name="label" value=0
@@ -106,16 +120,17 @@
                     </div>
 
                 </div>
-                <div class="card-header">Bruit:</div>
+                <div class="card-header">Noise:</div>
                 <div class="card-body">
                     <output id={{"Nvalue"~n}} for={{"noise"~n}}>{{val["noise"~n]}}</output>
                     <br>
                     <input min="0" max="1" step="0.1" id={{"noise"~n}} name={{"noise"~n}} type="range"
                         value={{val["noise"~n]}} oninput="{{"Nvalue"~n}}.value={{"noise"~n}}.value">
+
                 </div>
+                <input class="btn btn-primary btn-sm" type="submit" value="Generate" />
             </div>
-            <br>
-            <input class="btn btn-primary" type="submit" value="Générer" />
+
 
         </div>
     </form>
