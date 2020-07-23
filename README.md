@@ -6,6 +6,12 @@ The model implementation comes from [here](https://github.com/manicman1999/Style
 
 Original paper: [Analyzing and Improving the Image Quality of StyleGAN](https://arxiv.org/abs/1912.04958)
 
+Run the program with
+
+```bash
+$ python app.py
+```
+
 ## Example of randomly generated logos
 ![Teaser image](./assets/example.png)
 
