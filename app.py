@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template
 import tensorflow as tf
 import numpy as np
-from stylegan_two import StyleGAN, nImage, noise
+from model.stylegan_two import StyleGAN
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0

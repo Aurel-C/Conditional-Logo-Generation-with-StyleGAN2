@@ -10,9 +10,7 @@ from tensorflow.keras.optimizers import *
 from tensorflow.keras.initializers import *
 import tensorflow as tf
 import tensorflow.keras.backend as K
-
-from conv_mod import *
-
+from model.conv_mod import *
 im_size = 128
 latent_size = 64
 BATCH_SIZE = 0
