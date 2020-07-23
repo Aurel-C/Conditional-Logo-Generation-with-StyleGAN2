@@ -1,6 +1,6 @@
 # Conditional-Logo-Generation-with-StyleGAN2
 
-This project is an implementation of StylGAN2 for logo generation.
+This project is an application of StylGAN2 for logo generation.
 
 The model implementation comes from [here](https://github.com/manicman1999/StyleGAN2-Tensorflow-2.0/) with some changes to support conditional GANs.
 
