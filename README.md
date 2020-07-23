@@ -2,7 +2,7 @@
 
 This project is an application of StylGAN2 for logo generation with Tensorflow and Flask.
 
-The model implementation comes from [here](https://github.com/manicman1999/StyleGAN2-Tensorflow-2.0/) with some changes to support conditional GANs.
+The model implementation comes from [here](https://github.com/manicman1999/StyleGAN2-Tensorflow-2.0/) with some changes to support conditional GANs and run on CPU.
 
 Original paper: [Analyzing and Improving the Image Quality of StyleGAN](https://arxiv.org/abs/1912.04958)
 
