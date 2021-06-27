@@ -1,4 +1,4 @@
-# Conditional-Logo-Generation-with-StyleGAN2
+# Conditional Logo Generation with StyleGAN2
 
 This project is an application of StylGAN2 for logo generation with Tensorflow and Flask.
 
