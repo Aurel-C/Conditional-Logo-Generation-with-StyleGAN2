@@ -1,4 +1,4 @@
 tensorflow == 2.1.0
-pillow == 7.2.0
+pillow == 9.0.0
 flask == 1.1.2
 h5py==2.10
